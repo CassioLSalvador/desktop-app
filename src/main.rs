@@ -1,26 +1,58 @@
-use iced::widget::{button, text};
-use iced::Element;
+use iced::widget::{
+  button,
+  column,
+  text,
+  Column,
+};
 
 #[derive(Default)]
-struct AppState {
-    value: u64,
+struct Counter {
+  value: i64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum Message {
-    Increment,
+  Increment,
+  Decrement,
 }
 
-fn update(counter: &mut AppState, message: Message) {
+impl Counter {
+  fn update(&mut self, message: Message) {
     match message {
-        Message::Increment => counter.value += 1,
+      Message::Increment => {
+        self.value += 1;
+      }
+      Message::Decrement => {
+        self.value -= 1;
+      }
     }
-}
+  }
 
-fn view(counter: &AppState) -> Element<'_, Message> {
-    button(text(counter.value)).on_press(Message::Increment).into()
+  fn view(&self) -> Column<Message> {
+    column![
+      button("+").on_press(Message::Increment),
+      text(self.value),
+      button("-").on_press(Message::Decrement),
+    ]
+  }
 }
 
 pub fn main() -> iced::Result {
-    iced::run(update, view)
+  iced::run(Counter::update, Counter::view)
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_counting() {
+    let mut counter = Counter { value: 0 };
+
+    counter.update(Message::Increment);
+    counter.update(Message::Increment);
+    counter.update(Message::Decrement);
+
+    assert_eq!(counter.value, 1);
+  }
+}  
