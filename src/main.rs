@@ -1,12 +1,30 @@
+use iced::Theme;
+use iced::font::{Family, Weight, Stretch, Style};
+use iced::{Fill, Font};
+use iced::window;
 use iced::widget::{
   button,
   column,
-  text,
   Column,
+  container,
+  text,
 };
 
+struct BulletPoint {
+  title: String,
+  description: Option<String>,
+}
+
+struct Interest {
+  title: String,
+  bullet_points: Vec<BulletPoint>,
+  image: Option<String>,
+  interests: Option<Vec<Interest>>,
+}
+
 #[derive(Default)]
-struct Counter {
+struct State {
+  interests: Option<Vec<Interest>>,
   value: i64,
 }
 
@@ -16,7 +34,7 @@ enum Message {
   Decrement,
 }
 
-impl Counter {
+impl State {
   fn update(&mut self, message: Message) {
     match message {
       Message::Increment => {
@@ -28,17 +46,37 @@ impl Counter {
     }
   }
 
-  fn view(&self) -> Column<Message> {
+  fn view(&self) -> Column<'_, Message> {
+    let font_definitions = Font {
+      family: Family::Fantasy,
+      weight: Weight::Bold,
+      stretch: Stretch::Expanded,
+      style: Style::Normal,
+      // ..Default::default()
+    };
+
     column![
-      button("+").on_press(Message::Increment),
-      text(self.value),
-      button("-").on_press(Message::Decrement),
+      text("Manage your interests")
+        .font(font_definitions)
+        .size(42)
+        .width(Fill)
+        .height(150)
+        .center(),
+      // button("+").on_press(Message::Increment),
+      // text(self.value),
+      // button("-").on_press(Message::Decrement),
     ]
   }
 }
 
 pub fn main() -> iced::Result {
-  iced::run(Counter::update, Counter::view)
+  let theme = Theme::TokyoNightLight;
+  let window_settings = window::Settings {
+    maximized: true,
+    ..Default::default()
+  };
+
+  iced::application(State::default, State::update, State::view).theme(theme).window(window_settings).run()
 }
 
 #[cfg(test)]
@@ -47,12 +85,12 @@ mod tests {
 
   #[test]
   fn test_counting() {
-    let mut counter = Counter { value: 0 };
+    let mut state = State::default();
 
-    counter.update(Message::Increment);
-    counter.update(Message::Increment);
-    counter.update(Message::Decrement);
+    state.update(Message::Increment);
+    state.update(Message::Increment);
+    state.update(Message::Decrement);
 
-    assert_eq!(counter.value, 1);
+    assert_eq!(state.value, 1);
   }
 }  
